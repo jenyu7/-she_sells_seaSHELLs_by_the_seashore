@@ -4,6 +4,7 @@ char * read_line() {
   char *line = NULL;
   size_t size = 0;
   if ( getline(&line, &size, stdin) == -1 ) {
+    free(line);
     printf("exit\n");
     exit(0);
   }
