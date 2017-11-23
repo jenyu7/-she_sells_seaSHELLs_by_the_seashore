@@ -23,7 +23,7 @@ int main()
     print_shell_input();
     char input[256];
     if ( !fgets(input, sizeof(input), stdin) ) {
-      printf("logout");
+      printf("exit\n");
       exit(0);
     }
     strip_newline( input );

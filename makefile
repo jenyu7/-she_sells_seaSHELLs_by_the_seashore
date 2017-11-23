@@ -8,4 +8,4 @@ run: all
 	./shell
 
 clean:
-	rm -f *~ shell *# *.sh
+	rm -f *~ shell *#
