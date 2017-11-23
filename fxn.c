@@ -50,7 +50,9 @@ void exec_all( char * input ) {
     char **args = parse_args(cmd, ' ');
     fork_exec( args );
     cmd = cmds[++n];
+    free(args);
   }
+  free(cmds);
 }
 
 
