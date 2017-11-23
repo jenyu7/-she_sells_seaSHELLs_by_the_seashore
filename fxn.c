@@ -83,7 +83,7 @@ void fork_exec( char ** args ) {
 }
 
 void print_shell_input() {
-  char user[15], host[15], wd[50];
+  char user[256], host[256], wd[256];
   struct passwd *pw = getpwuid(getuid());
   strcpy(user, pw->pw_name);
   gethostname(host, sizeof(host));
