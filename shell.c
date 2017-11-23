@@ -7,23 +7,27 @@
 
 #include "head.h"
 
+static void sighandler(int signo) {
+  if (signo == SIGINT) {
+    printf("\n");
+    print_shell_input();
+    fflush(stdout);
+  }
+}
+
 int main()
 {
-  char * end = (char *)malloc(256 * sizeof(char));
-  char * s;
-  fgets(s, sizeof(s), stdin);
-  s = strsep(&end, "\n");
-  int status;
-  char ** cmd = parse_args(s);
-  if (fork())
-    {
-      wait(&status);
-      printf("child done doing thing\n");
+  signal(SIGINT, sighandler);
+
+  while(1) {
+    print_shell_input();
+    char input[256];
+    if ( !fgets(input, sizeof(input), stdin) ) {
+      printf("logout");
+      exit(0);
     }
-  else
-    {
-      printf("doing thang\n");
-      execvp(cmd[0], cmd);
-    }
+    strip_newline( input );
+    fork_exec( parse_args(input) );
+  }
   return 0;
 }
