@@ -9,7 +9,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 
-char ** parse_args( char * line );
+char * read_line();
+char ** parse_args( char * line, char delim );
 void strip_newline( char *str );
 void fork_exec( char ** args );
 void exec_all( char * input );

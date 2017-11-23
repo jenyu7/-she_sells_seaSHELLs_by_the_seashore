@@ -21,13 +21,11 @@ int main()
 
   while(1) {
     print_shell_input();
-    char input[256];
-    if ( !fgets(input, sizeof(input), stdin) ) {
-      printf("exit\n");
-      exit(0);
-    }
+    char * input;
+    input = read_line();
     strip_newline( input );
-    fork_exec( parse_args(input) );
+    exec_all( input );
+    free(input);
   }
   return 0;
 }

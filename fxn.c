@@ -1,10 +1,27 @@
 #include "head.h"
 
-char ** parse_args( char * line )
-{
-  char ** args = (char **)malloc(6 * sizeof(char *));
-  int i = 0;
-  while( (args[i++] = strsep(&line, " ")) );
+char * read_line() {
+  char *line = NULL;
+  size_t size = 0;
+  if ( getline(&line, &size, stdin) == -1 ) {
+    printf("exit\n");
+    exit(0);
+  }
+  return line;
+}
+
+char ** parse_args( char * line, char delim){
+  int size = 6; // start with 5 args
+  char **args = malloc( size * sizeof(char *));
+  int n = 0;
+  while( line ){
+    args[n] = strsep( &line, &delim);
+    if ( ++n == size) {
+      size += 5; // add 5 args as necessary
+      args = realloc( args, size * sizeof(char *));
+    }
+  }
+  args[n] = 0;
   return args;
 }
 
@@ -16,6 +33,26 @@ void strip_newline( char *str ) {
     str++;
   }
 }
+
+char * trim(char *c) {
+    char * e = c + strlen(c) - 1;
+    while(*c && isspace(*c)) c++;
+    while(e > c && isspace(*e)) *e-- = '\0';
+    return c;
+}
+
+void exec_all( char * input ) {
+  char ** cmds = parse_args(input, ';');
+  char *cmd = *cmds;
+  int n = 0;
+  while( cmd ){
+    cmd = trim(cmd);
+    char **args = parse_args(cmd, ' ');
+    fork_exec( args );
+    cmd = cmds[++n];
+  }
+}
+
 
 void fork_exec( char ** args ) {
   if (!strcmp(args[0], "exit")) {
