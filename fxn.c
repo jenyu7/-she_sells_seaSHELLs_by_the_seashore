@@ -42,6 +42,7 @@ char * trim(char *c) {
 }
 
 void exec_all( char * input ) {
+  strip_newline(input);
   char ** cmds = parse_args(input, ';');
   char *cmd = *cmds;
   int n = 0;

@@ -23,7 +23,6 @@ int main()
     print_shell_input();
     char * input;
     input = read_line();
-    strip_newline( input );
     exec_all( input );
     free(input);
   }
