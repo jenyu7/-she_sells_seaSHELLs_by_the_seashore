@@ -17,4 +17,4 @@ gdb: all
 	gdb ./shell
 
 clean:
-	rm -f *~ shell *#
+	rm -f *~ shell *# *.o
