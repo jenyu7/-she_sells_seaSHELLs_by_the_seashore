@@ -7,6 +7,7 @@
 
 #include "head.h"
 
+//handle those signals
 static void sighandler(int signo) {
   if (signo == SIGINT) {
     printf("\n");
