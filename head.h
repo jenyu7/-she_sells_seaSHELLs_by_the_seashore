@@ -14,4 +14,4 @@ char ** parse_args( char * line, char delim );
 void strip_newline( char *str );
 void fork_exec( char ** args );
 void exec_all( char * input );
-void print_shell_input();
+void print_shell_prompt();

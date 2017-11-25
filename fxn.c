@@ -92,7 +92,7 @@ void fork_exec( char ** args ) {
     //if child process
     else{
       if (execvp(args[0], args)) {
-	//only enters if the command isn't valid
+        //only enters if the command isn't valid
         printf("%s: command not found\n", args[0]);
       }
       exit(0);
@@ -101,7 +101,7 @@ void fork_exec( char ** args ) {
 }
 
 //prints the header for the shell (what you would see on your own)
-void print_shell_input() {
+void print_shell_prompt() {
   char user[256], host[256], wd[256];
   struct passwd *pw = getpwuid(getuid());
   strcpy(user, pw->pw_name);
