@@ -32,12 +32,7 @@ char ** parse_args( char * line, char delim){
 
 //Get rid of that pesky newline!!
 void strip_newline( char *str ) {
-  while( *str ) {
-    if( *str == '\n' ) {
-      *str = 0;
-    }
-    str++;
-  }
+  while( (*strchr(str, '\n') = 0) );
 }
 
 //Trim of spaces at ends of cmd
@@ -66,6 +61,10 @@ void exec_all( char * input ) {
 
 //Forks off a child process to execute cmds
 void fork_exec( char ** args ) {
+  //if nothing entered
+  if( ! strcmp(args[0],"") ) {
+    return;
+  }
   //if exit command entered
   if (!strcmp(args[0], "exit")) {
     exit(0);

@@ -22,8 +22,7 @@ int main()
 
   while(1) {
     print_shell_prompt();
-    char * input;
-    input = read_line();
+    char * input = read_line();
     exec_all( input );
     free(input);
   }
