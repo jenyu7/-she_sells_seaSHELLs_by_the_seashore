@@ -32,7 +32,7 @@ char ** parse_args( char * line, char delim){
 
 //Get rid of that pesky newline!!
 void strip_newline( char *str ) {
-  while( (*strchr(str, '\n') = 0) );
+  *strrchr(str, '\n') = 0;
 }
 
 //Trim of spaces at ends of cmd
