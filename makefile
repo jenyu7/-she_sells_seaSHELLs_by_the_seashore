@@ -2,10 +2,10 @@ all: shell.o fxn.o
 	gcc -g -o shell shell.o fxn.o
 
 shell.o: shell.c
-	gcc -c shell.c
+	gcc -g -c shell.c
 
 fxn.o: fxn.c
-	gcc -c fxn.c
+	gcc -g -c fxn.c
 
 run: all
 	./shell

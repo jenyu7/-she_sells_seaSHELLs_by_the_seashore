@@ -14,12 +14,12 @@ char * read_line() {
 }
 
 //Parse arguments of received cmd
-char ** parse_args( char * line, char delim){
+char ** parse_args( char * line, char * delim){
   int size = 6; // start with 5 args
   char **args = malloc( size * sizeof(char *));
   int n = 0;
   while( line ){
-    args[n] = strsep( &line, &delim);
+    args[n] = strsep( &line, delim);
     //dynamic sizing
     if ( ++n == size) {
       size += 5; // add 5 args as necessary
@@ -46,12 +46,12 @@ char * trim(char *c) {
 //Execute commands (call fxns defined above)
 void exec_all( char * input ) {
   strip_newline(input);
-  char ** cmds = parse_args(input, ';');
+  char ** cmds = parse_args(input, ";");
   char *cmd = *cmds;
   int n = 0;
   while( cmd ){
     cmd = trim(cmd);
-    char **args = parse_args(cmd, ' ');
+    char **args = parse_args(cmd, " ");
     fork_exec( args );
     cmd = cmds[++n];
     free(args);
