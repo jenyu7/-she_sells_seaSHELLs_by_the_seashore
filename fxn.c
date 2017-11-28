@@ -71,15 +71,15 @@ void fork_exec( char ** args ) {
   }
   //if asked to change directory (cd)
   else if ( !strcmp( args[0], "cd" ) ) {
-    if (!args[1]) {
-      struct passwd *pw = getpwuid(getuid());
-      chdir(pw->pw_dir);
-    }
-    //if unable, print why could not cd into the dir.
-    else {
+    if (args[1]) {
       if (chdir(args[1])) {
+        //if unable, print why could not cd into the dir.
         printf("shell: cd: %s: %s\n", args[1], strerror(errno));
       }
+    }
+    else {
+      struct passwd *pw = getpwuid(getuid());
+      chdir(pw->pw_dir);
     }
   }
   //other commands
