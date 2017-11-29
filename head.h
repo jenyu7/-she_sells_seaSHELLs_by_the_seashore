@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <pwd.h>
+#include <fcntl.h>
 
 char * read_line();
 char ** parse_args( char * line, char * delim );

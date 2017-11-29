@@ -51,12 +51,48 @@ void exec_all( char * input ) {
   int n = 0;
   while( cmd ){
     cmd = trim(cmd);
+    if (check(cmd) > 0)
+      {
+	redirect(check(cmd), cmd);
+      }
     char **args = parse_args(cmd, " ");
     fork_exec( args );
     cmd = cmds[++n];
     free(args);
   }
   free(cmds);
+}
+
+void redirect(int id, char * cmd)
+{
+  if (id == 2)
+    {
+      char ** args = parse_args(cmd, ">");
+      if (args[1])
+	{
+	int new = open(trim(args[1]), O_CREAT | O_WRONLY);
+	int stdout = dup(STDOUT_FILENO);
+	dup2(new, STDOUT_FILENO);
+	fork_exec(parse_args(args[0], " "));
+	dup2(new, stdout);
+	close(new);
+	}
+    }
+  else
+    printf("Command not found.\n");
+}
+
+//returns 2 with < ; 3 with >
+int check(char * cmd)
+{
+  while(cmd ++)
+    {
+      if(!strcmp(cmd, "<"))
+	return 2;
+      if(!strcmp(cmd, ">"))
+	return 3;
+    }
+  return 0;
 }
 
 //Forks off a child process to execute cmds
