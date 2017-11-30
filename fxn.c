@@ -84,31 +84,28 @@ void pipredir(int id, char * cmd) {
   }
   else if (id == 3){
     args = parse_args(cmd, "|");
-    if (strcmp(args[1], "")
-      {
-	FILE *fp;
-	char path[128];
-	fp = popen(args[0],"w");
-	if (fp = NULL)
-	  {
-	    printf("bleh\n");
-	    return;
-	  }
-	copy = dup(STDIN_FILENO);
-	old = dup2(fileno(fp), STDIN_FILENO);
-	new_cmd = parse_args(trim(args[1]), " ");
-	fork_exec(new_cmd);
-	dup2(copy, old);
-	pclose(fp);
-	free(new_cmd);
-	free(args);
-	return;
-      }
-      else
-	{
-	  printf("Syntax error\n");
-	  return;
-	}
+    if (strcmp(args[1], "")) {
+      FILE *fp;
+      fp = popen(args[0],"r");
+      if (!fp)
+        {
+          printf("bleh\n");
+          return;
+        }
+      copy = dup(STDIN_FILENO);
+      old = dup2(fileno(fp), STDIN_FILENO);
+      new_cmd = parse_args(trim(args[1]), " ");
+      fork_exec(new_cmd);
+      dup2(copy, old);
+      pclose(fp);
+      free(new_cmd);
+      free(args);
+      return;
+    }
+    else {
+      printf("Syntax error\n");
+      return;
+    }
   }
   new_cmd = parse_args(trim(args[0]), " ");
   fork_exec(new_cmd);
