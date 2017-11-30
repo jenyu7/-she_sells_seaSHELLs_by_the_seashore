@@ -44,14 +44,15 @@ char * trim(char *c) {
 }
 
 //returns 1 for stdout redirection (>), 2 for stdin redirection (<), or 0
-int check_redirect(char * cmd) {
+int check_special(char * cmd) {
   if(strchr(cmd, '>')) return 1;
   if(strchr(cmd, '<')) return 2;
+  if(strchr(cmd, '|')) return 3;
   return 0;
 }
 
 //handles commands that require redirection
-void redirect(int id, char * cmd) {
+void pipredir(int id, char * cmd) {
   char ** args;
   char ** new_cmd;
   int new, copy, old;
@@ -81,6 +82,34 @@ void redirect(int id, char * cmd) {
       return;
     }
   }
+  else if (id == 3){
+    args = parse_args(cmd, "|");
+    if (strcmp(args[1], "")
+      {
+	FILE *fp;
+	char path[128];
+	fp = popen(args[0],"w");
+	if (fp = NULL)
+	  {
+	    printf("bleh\n");
+	    return;
+	  }
+	copy = dup(STDIN_FILENO);
+	old = dup2(fileno(fp), STDIN_FILENO);
+	new_cmd = parse_args(trim(args[1]), " ");
+	fork_exec(new_cmd);
+	dup2(copy, old);
+	pclose(fp);
+	free(new_cmd);
+	free(args);
+	return;
+      }
+      else
+	{
+	  printf("Syntax error\n");
+	  return;
+	}
+  }
   new_cmd = parse_args(trim(args[0]), " ");
   fork_exec(new_cmd);
   dup2(copy, old);
@@ -97,8 +126,8 @@ void exec_all( char * input ) {
   int n = 0;
   while( cmd ){
     cmd = trim(cmd);
-    if (check_redirect(cmd)) {
-      redirect(check_redirect(cmd), cmd);
+    if (check_special(cmd)) {
+      pipredir(check_special(cmd), cmd);
     }
     else {
       char **args = parse_args(cmd, " ");
