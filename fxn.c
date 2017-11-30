@@ -43,6 +43,44 @@ char * trim(char *c) {
     return c;
 }
 
+//returns 1 for stdout redirection (>), 2 for stdin redirection (<), or 0
+int check_redirect(char * cmd) {
+    if(strchr(cmd, '>')) return 1;
+    if(strchr(cmd, '<')) return 2;
+    return 0;
+}
+
+//handles commands that require redirection
+void redirect(int id, char * cmd) {
+  char ** args;
+  char ** new_cmd;
+  int new, copy, old;
+  if (id == 1){
+    args = parse_args(cmd, ">");
+    if (args[1]) {
+      new = open(trim(args[1]), O_CREAT | O_WRONLY, 0644);
+      copy = dup(STDOUT_FILENO);
+      old = dup2(new, STDOUT_FILENO);
+    }
+    else printf("shell: syntax error near >\n");
+  }
+  else if (id == 2) {
+    args = parse_args(cmd, "<");
+    if (args[1]) {
+      new = open(trim(args[1]), O_RDONLY);
+      copy = dup(STDIN_FILENO);
+      old = dup2(new, STDIN_FILENO);
+    }
+    else printf("shell: syntax error near <\n");
+  }
+  new_cmd = parse_args(trim(args[0]), " ");
+  fork_exec(new_cmd);
+  dup2(copy, old);
+  close(new);
+  free(new_cmd);
+  free(args);
+}
+
 //Execute commands (call fxns defined above)
 void exec_all( char * input ) {
   strip_newline(input);
@@ -51,48 +89,17 @@ void exec_all( char * input ) {
   int n = 0;
   while( cmd ){
     cmd = trim(cmd);
-    if (check(cmd) > 0)
-      {
-	redirect(check(cmd), cmd);
-      }
-    char **args = parse_args(cmd, " ");
-    fork_exec( args );
+    if (check_redirect(cmd)) {
+      redirect(check_redirect(cmd), cmd);
+    }
+    else {
+      char **args = parse_args(cmd, " ");
+      fork_exec( args );
+      free(args);
+    }
     cmd = cmds[++n];
-    free(args);
   }
   free(cmds);
-}
-
-void redirect(int id, char * cmd)
-{
-  if (id == 2)
-    {
-      char ** args = parse_args(cmd, ">");
-      if (args[1])
-	{
-	int new = open(trim(args[1]), O_CREAT | O_WRONLY);
-	int stdout = dup(STDOUT_FILENO);
-	dup2(new, STDOUT_FILENO);
-	fork_exec(parse_args(args[0], " "));
-	dup2(new, stdout);
-	close(new);
-	}
-    }
-  else
-    printf("Command not found.\n");
-}
-
-//returns 2 with < ; 3 with >
-int check(char * cmd)
-{
-  while(cmd ++)
-    {
-      if(!strcmp(cmd, "<"))
-	return 2;
-      if(!strcmp(cmd, ">"))
-	return 3;
-    }
-  return 0;
 }
 
 //Forks off a child process to execute cmds
