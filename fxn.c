@@ -37,17 +37,17 @@ void strip_newline( char *str ) {
 
 //Trim of spaces at ends of cmd
 char * trim(char *c) {
-    char * e = c + strlen(c) - 1;
-    while(*c && isspace(*c)) c++;
-    while(e > c && isspace(*e)) *e-- = '\0';
-    return c;
+  char * e = c + strlen(c) - 1;
+  while(*c && isspace(*c)) c++;
+  while(e > c && isspace(*e)) *e-- = '\0';
+  return c;
 }
 
 //returns 1 for stdout redirection (>), 2 for stdin redirection (<), or 0
 int check_redirect(char * cmd) {
-    if(strchr(cmd, '>')) return 1;
-    if(strchr(cmd, '<')) return 2;
-    return 0;
+  if(strchr(cmd, '>')) return 1;
+  if(strchr(cmd, '<')) return 2;
+  return 0;
 }
 
 //handles commands that require redirection
@@ -57,21 +57,29 @@ void redirect(int id, char * cmd) {
   int new, copy, old;
   if (id == 1){
     args = parse_args(cmd, ">");
-    if (args[1]) {
+    if (strcmp(args[1], "")) {
       new = open(trim(args[1]), O_CREAT | O_WRONLY, 0644);
       copy = dup(STDOUT_FILENO);
       old = dup2(new, STDOUT_FILENO);
     }
-    else printf("shell: syntax error near >\n");
+    else {
+      printf("shell: syntax error near >\n");
+      free(args);
+      return;
+    }
   }
   else if (id == 2) {
     args = parse_args(cmd, "<");
-    if (args[1]) {
+    if (strcmp(args[1], "")) {
       new = open(trim(args[1]), O_RDONLY);
       copy = dup(STDIN_FILENO);
       old = dup2(new, STDIN_FILENO);
     }
-    else printf("shell: syntax error near <\n");
+    else {
+      printf("shell: syntax error near <\n");
+      free(args);
+      return;
+    }
   }
   new_cmd = parse_args(trim(args[0]), " ");
   fork_exec(new_cmd);
