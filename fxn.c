@@ -89,7 +89,7 @@ void pipredir(int id, char * cmd) {
       fp = popen(args[0],"r");
       if (!fp)
         {
-          printf("bleh\n");
+          printf("No pipe exists.\n");
           return;
         }
       copy = dup(STDIN_FILENO);
@@ -162,8 +162,9 @@ void fork_exec( char ** args ) {
   //other commands
   else {
     //if parent process
-    if (fork()){
-      wait(0);
+    int cpid;
+    if ((cpid = fork())){
+      waitpid(cpid, NULL, 0);
     }
     //if child process
     else{

@@ -19,12 +19,14 @@ static void sighandler(int signo) {
 int main()
 {
   signal(SIGINT, sighandler);
-
   while(1) {
     print_shell_prompt();
+    //printf("reading line\n");
     char * input = read_line();
     exec_all( input );
     free(input);
+    
+    //printf("shell\n");
   }
   return 0;
 }
