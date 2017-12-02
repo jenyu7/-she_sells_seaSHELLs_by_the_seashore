@@ -48,26 +48,49 @@ int check_special(char * cmd) {
   if(strchr(cmd, '>')) return 1;
   if(strchr(cmd, '<')) return 2;
   if(strchr(cmd, '|')) return 3;
+  if(strchr(cmd, '>') && strchr(cmd, '<')) return 4;
   return 0;
 }
 
+int size(char** args)
+{
+  int i = 0;
+  while(*args++) { i++; }
+  return i;
+}
+  
+  
 //handles commands that require redirection
 void pipredir(int id, char * cmd) {
   char ** args;
   char ** new_cmd;
-  int new, copy, old;
+  int new, copy, old, tmp;
   if (id == 1){
     args = parse_args(cmd, ">");
-    if (strcmp(args[1], "")) {
-      new = open(trim(args[1]), O_CREAT | O_WRONLY, 0644);
-      copy = dup(STDOUT_FILENO);
-      old = dup2(new, STDOUT_FILENO);
-    }
-    else {
-      printf("shell: syntax error near >\n");
-      free(args);
-      return;
-    }
+    int i = 1;
+    printf("size: %d\n", size(args));
+    while(i < size(args))
+      {
+	if (strcmp(args[i], "")) {
+	  if(i == size(args)-1)
+	    {
+	      new = open(trim(args[i]), O_CREAT | O_WRONLY, 0644);
+	      copy = dup(STDOUT_FILENO);
+	      old = dup2(new, STDOUT_FILENO);
+	    }
+	  else{
+	    tmp = open(trim(args[i]), O_CREAT, 0644);
+	    close(tmp);
+	  }
+	}
+	else {
+	  printf("shell: syntax error near >\n");
+	  free(args);
+	  return;
+	}
+	i ++;
+      }
+    printf("done\n");
   }
   else if (id == 2) {
     args = parse_args(cmd, "<");
