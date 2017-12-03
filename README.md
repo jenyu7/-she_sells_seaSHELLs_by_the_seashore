@@ -2,33 +2,30 @@
 DWSH<br>
 by JonAlf Dyrland-Weaver and Neeraj Bhatia
 
-Features:<br>
-	Forks and executes commands!<br>
-	Parses multiple commands on one line!<br>
-	Redirects using >, <!<br>
-	Guaranteed to regrow hair!<br>
-	Can summon a winged unicorn for fast & magical transit!<br>
+## Features:<br>
+* Forks and executes commands. 
+* Parses multiple commands on one line. 
+* Redirects using >, <.
+	- Chaining redirections like ```ls > a > b > c``` works. 
+* Simple piping, such as ```ls | wc``` works.
+* Prints out shell prompt. 
 
-Attempted:<br>
-	The following did not end up working, but have been left in the code, commented out.<br>
-	Could not get pipes to work<br>
-	Tried to implement >>, but it kept overwriting the file<br>
-	Looked at replacing ~/ with home directory, got seg faults<br>
-	Was unable to have the "puppy" command produce a puppy and eject it from the optical drive.<br>
+## Attempted:
+**The following did not end up working, but have been left in the code, commented out.**<br>
+* Double redirection, like ```ls < a > b``` was not finished.
 
-Bugs:<br>
-	Putting two ;'s next to each other will break the parser<br>
-	Redirecting to a file that does not exist occasionally does not work.<br>
-	Hair regrowth function may result in a seg fault.<br>
-	Occasionally, the unicorn command will fail, opening a great chasm in the earth and summoning the demon Beelzebub, who will proceeded to unleash his wrath and begin his reign of terror.<br>
+## Bugs:
+* Putting two ;'s next to each other will break the parser<br>
+* Redirecting to a file that does not exist occasionally does not work.<br>
 	
-Files & Function Headers:<br>
-parse.c<br>
-	Handles all line parsing fucntions<br>
-	/*======== int count_tokens() ==========<br>
-	Inputs:  char *line<br>
-        	  char delim <br>
-	Returns: Number of tokens in line separated by delim<br>
+## Files & Function Headers:
+```fxn.c```<br>
+**Contains all functions used within project** <br>
+
+	/*======== int count_tokens() ==========
+	Inputs:  char *line
+        	  char delim 
+	Returns: Number of tokens in line separated by delim
 
 	Counts the number of times the character delim appears in the
 	 string line
@@ -54,8 +51,7 @@ parse.c<br>
 	Terminating '\0' is placed at a new location if necessary.<br>
 	====================*/
 
-dwsh.c<br>
-	Handles the forking an executing of commands...<br>
+```dwsh.c```<br>
+**Handles the sequence of running commands in the shell, by calling the functions in ```fxn.c```** <br>
 
-magical.c<br>
-UNOCORNS! <br>
+
