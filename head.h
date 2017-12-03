@@ -17,7 +17,6 @@ void strip_newline( char *str );
 char* trim();
 int check_special(char * cmd);
 int size(char ** args);
-void pipredir(int id, char * cmd);
+void pipredir(int id, char * cmd, char * exec);
 void fork_exec( char ** args );
 void exec_all( char * input );
-

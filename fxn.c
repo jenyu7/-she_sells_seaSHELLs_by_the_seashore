@@ -1,12 +1,12 @@
 #include "head.h"
 
 /*======== void print_shell_prompt() ==========
-Inputs: NONE
-Returns: NONE
+  Inputs: NONE
+  Returns: NONE
 
-Prints out the shell prompt of the user, as would normally 
-be seen in bash.
-=============================================*/
+  Prints out the shell prompt of the user, as would normally
+  be seen in bash.
+  =============================================*/
 void print_shell_prompt() {
   char user[256], host[256], wd[256];
   struct passwd *pw = getpwuid(getuid());
@@ -17,13 +17,13 @@ void print_shell_prompt() {
 }
 
 /*======== char * read_line() ==========
-Inputs: NONE
-Returns: Line read from stdin
-         Otherwise, exits.
-Uses C function getline(char **lineptr, size_t *n, FILE *stream) [man 3]
-Tries to read line from stdin, 
-If failed, exits program.
-=======================================*/
+  Inputs: NONE
+  Returns: Line read from stdin
+  Otherwise, exits.
+  Uses C function getline(char **lineptr, size_t *n, FILE *stream) [man 3]
+  Tries to read line from stdin,
+  If failed, exits program.
+  =======================================*/
 char * read_line() {
   char *line = NULL;
   size_t size = 0;
@@ -37,12 +37,12 @@ char * read_line() {
 }
 
 /*======== char ** parse_args() ==========
-Inputs: char * line, char * delim
-Returns: char ** [array of strings previously separated by delim]
+  Inputs: char * line, char * delim
+  Returns: char ** [array of strings previously separated by delim]
 
-Starts with parsing five arguments using strsep
-If more than five args, array dynamically resized with +5 more arguments
-=========================================*/
+  Starts with parsing five arguments using strsep
+  If more than five args, array dynamically resized with +5 more arguments
+  =========================================*/
 char ** parse_args( char * line, char * delim){
   int size = 6; // start with 5 args
   char **args = malloc( size * sizeof(char *));
@@ -60,24 +60,24 @@ char ** parse_args( char * line, char * delim){
 }
 
 /*======== void strip_newline() ==========
-Inputs: char * str
-Returns: NONE
+  Inputs: char * str
+  Returns: NONE
 
-Removes the newline character from the end of a string.
-=========================================*/
+  Removes the newline character from the end of a string.
+  =========================================*/
 void strip_newline( char *str ) {
   *strrchr(str, '\n') = 0;
 }
 
 /*======== char* trim() ==========
-Inputs: char * c
-Returns: Pointer to beginning of string (w/o spaces)
+  Inputs: char * c
+  Returns: Pointer to beginning of string (w/o spaces)
 
-Removes the spaces in front of and behind a string.
-*c removes spaces from the front. 
-*e removes from back, and ensures null termination.
-isspace() function used to check if pointing to space.
-================================*/
+  Removes the spaces in front of and behind a string.
+  *c removes spaces from the front.
+  *e removes from back, and ensures null termination.
+  isspace() function used to check if pointing to space.
+  ================================*/
 char * trim(char *c) {
   char * e = c + strlen(c) - 1;
   while(*c && isspace(*c)) c++;
@@ -86,174 +86,148 @@ char * trim(char *c) {
 }
 
 /*======== int check_special(char * cmd) ========
-Inputs: char * cmd
-Returns: int id# representing what type of special command
+  Inputs: char * cmd
+  Returns: int id# representing what type of special command
 
-Checks if the cmdline input involves redirection or piping.
-Returns an integer identifier based on special character found:
-> : 1; < : 2; | : 3; < X > : 4
-Returns 0 if no pipes or redirection characters found.
-===============================================*/
+  Checks if the cmdline input involves redirection or piping.
+  Returns an integer identifier based on special character found:
+  > : 1; < : 2; | : 3;
+  Returns 0 if no pipes or redirection characters found.
+  ===============================================*/
 int check_special(char * cmd) {
-  if(strchr(cmd, '>')) return 1;
-  if(strchr(cmd, '<')) return 2;
+  if(strchr(cmd, '<')) return 1;
+  if(strchr(cmd, '>')) return 2;
   if(strchr(cmd, '|')) return 3;
-  //for double redirection
-  if(strchr(cmd, '>') && strchr(cmd, '<')) return 4;
   return 0;
 }
 
 /*======== int size(char ** args) ==========
-Inputs: char ** args
-Returns: int size
+  Inputs: char ** args
+  Returns: int size
 
-Finds the size of an array of strings.
-==========================================*/
+  Finds the size of an array of strings.
+  ==========================================*/
 int size(char** args)
 {
   int i = 0;
   while(*args++) { i++; }
   return i;
 }
-  
-  
-/*======== void pipredir(int id, char * cmd) ==========
-Inputs: int id, char * cmd
-Returns: NONE
 
-Executes the redirection and piping functionality of the shell.
-id == 1: signals > redirection
+
+/*======== void pipredir(int id, char * cmd, char * exec) ==========
+  Inputs: int id, char * cmd, char * exec
+  Returns: NONE
+
+  Executes the redirection and piping functionality of the shell.
+  id == 1: signals > redirection
   Parses arguments with > delimeter
-  Chaining - if more than one '>', create series of empty files, and dup/dup2
-  for the last file (the only one that gets written in)
-  For last file, open a file and switch it with stdout using dup and dup2.
-id == 2: signals < redirection
+  Chaining - if more than one '>', only the last one gets written in like bash.
+  id == 2: signals < redirection
   Parses arguments with < delimeter
-  Chaining - if more than one '<', only execute cmd for last file, and only if
-  files in the sequence all exist
-  For last file, open the file and switch it with stdin using dup and dup2.
-=====================================================*/
-void pipredir(int id, char * cmd) {
-  char ** args;
-  char ** new_cmd;
-  int new, copy, old, tmp;
-  // > redirection
-  if (id == 1){
-    args = parse_args(cmd, ">");
-    int i = 1;
-    //printf("size: %d\n", size(args));
-    while(i < size(args))
-      {
-	if (strcmp(args[i], "")) {
-	  //the last argument
-	  if(i == size(args)-1)
-	    {
-	      new = open(trim(args[i]), O_CREAT | O_WRONLY, 0644);
-	      copy = dup(STDOUT_FILENO);
-	      old = dup2(new, STDOUT_FILENO);
-	    }
-	  //intermediary files
-	  else{
-	    tmp = open(trim(args[i]), O_CREAT, 0644);
-	    close(tmp);
-	  }
-	}
-	else {
-	  printf("shell: syntax error near >\n");
-	  free(args);
-	  return;
-	}
-	i ++;
-      }
+  Chaining - if more than one '<', only the last one is read as stdin like bash.
+  =====================================================*/
+void pipredir(int id, char * cmd, char * exec) {
+  int new, copy, old;
+  if (id == 1) {
+    if (exec) { strsep(&cmd, "<"); }
+    else { exec = strsep(&cmd, "<"); }
+    if (!strcmp(cmd, "")) {
+      printf("Syntax error near <\n");
+      return;
+    }
+    if (check_special(cmd)) {
+      cmd = trim(cmd);
+      char * back = malloc(strlen(cmd));
+      strcpy(back, cmd);
+      char * curfile = strsep(&cmd, " ");
+      curfile = trim(curfile);
+      new = open(curfile, O_CREAT | O_RDONLY);
+      copy = dup(STDIN_FILENO);
+      old = dup2(new, STDIN_FILENO);
+      pipredir(check_special(back), back, exec);
+      dup2(copy, old);
+      free(back);
+    }
+    else {
+      new = open(trim(cmd), O_CREAT | O_RDONLY);
+      copy = dup(STDIN_FILENO);
+      old = dup2(new, STDIN_FILENO);
+      exec = trim(exec);
+      char ** args = parse_args(exec, " ");
+      fork_exec(args);
+      free(args);
+      dup2(copy, old);
+      close(new);
+    }
   }
-  // < redirection
-  else if (id == 2) {
-    args = parse_args(cmd, "<");
-    int i = 1;
-    while (i < size(args))
-      {
-	if (strcmp(args[i], "")) {
-	  new = open(trim(args[i]), O_RDONLY);
-	  //the last argument
-	  if (i == size(args)-1)
-	    {
-	      if (new != -1)
-		{
-		  copy = dup(STDIN_FILENO);
-		  old = dup2(new, STDIN_FILENO);
-		}
-	      else
-		{
-		  printf("shell: '%s' :No such file or directory\n", trim(args[i]));
-		  close(new);
-		  return;
-		}
-	    }
-	  //check if intermediary files exist
-	  else{
-	    if (new == -1)
-	      {
-		printf("shell: '%s' :No such file or directory\n", trim(args[i]));
-		close(new);
-		return;
-	      }
-	  }
-	  i ++;
-	}
-	else {
-	  printf("shell: syntax error near <\n");
-	  free(args);
-	  return;
-	}
-      }
+  if (id == 2) {
+    if (exec) { strsep(&cmd, ">"); }
+    else { exec = strsep(&cmd, ">"); }
+    if (!strcmp(cmd, "")) {
+      printf("Syntax error near >\n");
+      return;
+    }
+    if (check_special(cmd)) {
+      cmd = trim(cmd);
+      char * back = malloc(strlen(cmd));
+      strcpy(back, cmd);
+      char * curfile = strsep(&cmd, " ");
+      curfile = trim(curfile);
+      new = open(curfile, O_CREAT | O_WRONLY, 0644);
+      copy = dup(STDOUT_FILENO);
+      old = dup2(new, STDOUT_FILENO);
+      pipredir(check_special(back), back, exec);
+      dup2(copy, old);
+      free(back);
+    }
+    else {
+      new = open(trim(cmd), O_CREAT | O_WRONLY, 0644);
+      copy = dup(STDOUT_FILENO);
+      old = dup2(new, STDOUT_FILENO);
+      exec = trim(exec);
+      char ** args = parse_args(exec, " ");
+
+      fork_exec(args);
+      free(args);
+      dup2(copy, old);
+      close(new);
+    }
   }
-  // | (pipes)
-  else if (id == 3){
-    args = parse_args(cmd, "|");
+  if (id == 3) {
+    char ** args = parse_args(cmd, "|");
     if (strcmp(args[1], "")) {
       FILE *fp;
       fp = popen(args[0],"r");
-      if (!fp)
-        {
-          printf("No pipe exists.\n");
+      if (!fp) {
+          printf("Error: pipe could not be created\n");
           return;
-        }
+      }
       copy = dup(STDIN_FILENO);
       old = dup2(fileno(fp), STDIN_FILENO);
-      new_cmd = parse_args(trim(args[1]), " ");
+      char ** new_cmd = parse_args(trim(args[1]), " ");
       fork_exec(new_cmd);
       dup2(copy, old);
       pclose(fp);
       free(new_cmd);
       free(args);
-      return;
     }
     else {
-      printf("Syntax error\n");
-      return;
+      printf("Syntax error near |\n");
     }
   }
-  else if (id == 4)
-    {
-    }
-  new_cmd = parse_args(trim(args[0]), " ");
-  fork_exec(new_cmd);
-  dup2(copy, old);
-  close(new);
-  free(new_cmd);
-  free(args);
 }
 
 /*======== void fork_exec(char ** args) ==========
-Inputs: char * str
-Returns: NONE
+  Inputs: char * str
+  Returns: NONE
 
-Takes an array of arguments and executes them using execvp OR
-if exit command entered: exit the shell
-if cd command entered: use chdir() to move into another directory
-All other commands: fork off process and execvp. 
-[Piping and Redirection accounted for in pipredir() fxn above ^^]
-================================================*/
+  Takes an array of arguments and executes them using execvp OR
+  if exit command entered: exit the shell
+  if cd command entered: use chdir() to move into another directory
+  All other commands: fork off process and execvp.
+  [Piping and Redirection accounted for in pipredir() fxn above ^^]
+  ================================================*/
 void fork_exec( char ** args ) {
   //if nothing entered
   if( ! strcmp(args[0],"") ) {
@@ -295,13 +269,13 @@ void fork_exec( char ** args ) {
 }
 
 /*======== void exec_all(char * input) ==========
-Inputs: char * input
-Returns: NONE
+  Inputs: char * input
+  Returns: NONE
 
-Takes in input from the user and calls functions defined above
-based on the situation: e.g., if '<' character exists, then 
-call the function that deals with output redirection.
-===============================================*/
+  Takes in input from the user and calls functions defined above
+  based on the situation: e.g., if '<' character exists, then
+  call the function that deals with output redirection.
+  ===============================================*/
 void exec_all( char * input ) {
   strip_newline(input);
   char ** cmds = parse_args(input, ";");
@@ -310,7 +284,7 @@ void exec_all( char * input ) {
   while( cmd ){
     cmd = trim(cmd);
     if (check_special(cmd)) {
-      pipredir(check_special(cmd), cmd);
+      pipredir(check_special(cmd), cmd, 0);
     }
     else {
       char **args = parse_args(cmd, " ");
