@@ -10,9 +10,14 @@
 #include <pwd.h>
 #include <fcntl.h>
 
+void print_shell_prompt();
 char * read_line();
 char ** parse_args( char * line, char * delim );
 void strip_newline( char *str );
+char* trim();
+int check_special(char * cmd);
+int size(char ** args);
+void pipredir(int id, char * cmd);
 void fork_exec( char ** args );
 void exec_all( char * input );
-void print_shell_prompt();
+
