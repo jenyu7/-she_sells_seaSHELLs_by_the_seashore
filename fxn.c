@@ -138,7 +138,7 @@ void pipredir(int id, char * cmd, char * exec) {
     }
     if (check_special(cmd)) {
       cmd = trim(cmd);
-      char * back = malloc(strlen(cmd));
+      char back[strlen(cmd)];
       strcpy(back, cmd);
       char * curfile = strsep(&cmd, " ");
       curfile = trim(curfile);
@@ -147,7 +147,6 @@ void pipredir(int id, char * cmd, char * exec) {
       old = dup2(new, STDIN_FILENO);
       pipredir(check_special(back), back, exec);
       dup2(copy, old);
-      free(back);
     }
     else {
       new = open(trim(cmd), O_CREAT | O_RDONLY);
@@ -170,7 +169,7 @@ void pipredir(int id, char * cmd, char * exec) {
     }
     if (check_special(cmd)) {
       cmd = trim(cmd);
-      char * back = malloc(strlen(cmd));
+      char back[strlen(cmd)];
       strcpy(back, cmd);
       char * curfile = strsep(&cmd, " ");
       curfile = trim(curfile);
@@ -179,7 +178,6 @@ void pipredir(int id, char * cmd, char * exec) {
       old = dup2(new, STDOUT_FILENO);
       pipredir(check_special(back), back, exec);
       dup2(copy, old);
-      free(back);
     }
     else {
       new = open(trim(cmd), O_CREAT | O_WRONLY, 0644);
