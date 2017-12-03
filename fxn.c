@@ -1,5 +1,21 @@
 #include "head.h"
 
+/*======== void print_shell_prompt() ==========
+Inputs: NONE
+Returns: NONE
+
+Prints out the shell prompt of the user, as would normally 
+be seen in bash.
+=============================================*/
+void print_shell_prompt() {
+  char user[256], host[256], wd[256];
+  struct passwd *pw = getpwuid(getuid());
+  strcpy(user, pw->pw_name);
+  gethostname(host, sizeof(host));
+  getcwd(wd, sizeof(wd));
+  printf("%s@%s:%s$ ", user, host, wd);
+}
+
 /*======== char * read_line() ==========
 Inputs: NONE
 Returns: Line read from stdin
@@ -113,7 +129,9 @@ id == 1: signals > redirection
   For last file, open a file and switch it with stdout using dup and dup2.
 id == 2: signals < redirection
   Parses arguments with < delimeter
-  No chaining - 
+  Chaining - if more than one '<', only execute cmd for last file, and only if
+  files in the sequence all exist
+  For last file, open the file and switch it with stdin using dup and dup2.
 =====================================================*/
 void pipredir(int id, char * cmd) {
   char ** args;
@@ -156,6 +174,7 @@ void pipredir(int id, char * cmd) {
       {
 	if (strcmp(args[i], "")) {
 	  new = open(trim(args[i]), O_RDONLY);
+	  //the last argument
 	  if (i == size(args)-1)
 	    {
 	      if (new != -1)
@@ -170,6 +189,7 @@ void pipredir(int id, char * cmd) {
 		  return;
 		}
 	    }
+	  //check if intermediary files exist
 	  else{
 	    if (new == -1)
 	      {
@@ -187,6 +207,7 @@ void pipredir(int id, char * cmd) {
 	}
       }
   }
+  // | (pipes)
   else if (id == 3){
     args = parse_args(cmd, "|");
     if (strcmp(args[1], "")) {
@@ -220,28 +241,16 @@ void pipredir(int id, char * cmd) {
   free(args);
 }
 
-//Execute commands (call fxns defined above)
-void exec_all( char * input ) {
-  strip_newline(input);
-  char ** cmds = parse_args(input, ";");
-  char *cmd = *cmds;
-  int n = 0;
-  while( cmd ){
-    cmd = trim(cmd);
-    if (check_special(cmd)) {
-      pipredir(check_special(cmd), cmd);
-    }
-    else {
-      char **args = parse_args(cmd, " ");
-      fork_exec( args );
-      free(args);
-    }
-    cmd = cmds[++n];
-  }
-  free(cmds);
-}
+/*======== void fork_exec(char ** args) ==========
+Inputs: char * str
+Returns: NONE
 
-//Forks off a child process to execute cmds
+Takes an array of arguments and executes them using execvp OR
+if exit command entered: exit the shell
+if cd command entered: use chdir() to move into another directory
+All other commands: fork off process and execvp. 
+[Piping and Redirection accounted for in pipredir() fxn above ^^]
+================================================*/
 void fork_exec( char ** args ) {
   //if nothing entered
   if( ! strcmp(args[0],"") ) {
@@ -282,12 +291,30 @@ void fork_exec( char ** args ) {
   }
 }
 
-//prints the header for the shell (what you would see on your own)
-void print_shell_prompt() {
-  char user[256], host[256], wd[256];
-  struct passwd *pw = getpwuid(getuid());
-  strcpy(user, pw->pw_name);
-  gethostname(host, sizeof(host));
-  getcwd(wd, sizeof(wd));
-  printf("%s@%s:%s$ ", user, host, wd);
+/*======== void exec_all(char * input) ==========
+Inputs: char * input
+Returns: NONE
+
+Takes in input from the user and calls functions defined above
+based on the situation: e.g., if '<' character exists, then 
+call the function that deals with output redirection.
+===============================================*/
+void exec_all( char * input ) {
+  strip_newline(input);
+  char ** cmds = parse_args(input, ";");
+  char *cmd = *cmds;
+  int n = 0;
+  while( cmd ){
+    cmd = trim(cmd);
+    if (check_special(cmd)) {
+      pipredir(check_special(cmd), cmd);
+    }
+    else {
+      char **args = parse_args(cmd, " ");
+      fork_exec( args );
+      free(args);
+    }
+    cmd = cmds[++n];
+  }
+  free(cmds);
 }
