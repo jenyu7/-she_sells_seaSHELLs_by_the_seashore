@@ -1,11 +1,18 @@
 #include "head.h"
 
-//Reads the input from stdin
+/*======== char * read_line() ==========
+Inputs: NONE
+Returns: Line read from stdin
+         Otherwise, exits.
+Uses C function getline(char **lineptr, size_t *n, FILE *stream) [man 3]
+Tries to read line from stdin, 
+If failed, exits program.
+=======================================*/
 char * read_line() {
   char *line = NULL;
   size_t size = 0;
   //if failed to read line
-  if ( getline(&line, &size, stdin) == -1 ) {
+  if (getline(&line, &size, stdin) == -1 ) {
     free(line);
     printf("exit\n");
     exit(0);
@@ -13,7 +20,13 @@ char * read_line() {
   return line;
 }
 
-//Parse arguments of received cmd
+/*======== char ** parse_args() ==========
+Inputs: char * line, char * delim
+Returns: char ** [array of strings previously separated by delim]
+
+Starts with parsing five arguments using strsep
+If more than five args, array dynamically resized with +5 more arguments
+=========================================*/
 char ** parse_args( char * line, char * delim){
   int size = 6; // start with 5 args
   char **args = malloc( size * sizeof(char *));
@@ -30,12 +43,25 @@ char ** parse_args( char * line, char * delim){
   return args;
 }
 
-//Get rid of that pesky newline!!
+/*======== void strip_newline() ==========
+Inputs: char * str
+Returns: NONE
+
+Removes the newline character from the end of a string.
+=========================================*/
 void strip_newline( char *str ) {
   *strrchr(str, '\n') = 0;
 }
 
-//Trim of spaces at ends of cmd
+/*======== char* trim() ==========
+Inputs: char * c
+Returns: Pointer to beginning of string (w/o spaces)
+
+Removes the spaces in front of and behind a string.
+*c removes spaces from the front. 
+*e removes from back, and ensures null termination.
+isspace() function used to check if pointing to space.
+================================*/
 char * trim(char *c) {
   char * e = c + strlen(c) - 1;
   while(*c && isspace(*c)) c++;
@@ -43,15 +69,30 @@ char * trim(char *c) {
   return c;
 }
 
-//returns 1 for stdout redirection (>), 2 for stdin redirection (<), or 0
+/*======== int check_special(char * cmd) ========
+Inputs: char * cmd
+Returns: int id# representing what type of special command
+
+Checks if the cmdline input involves redirection or piping.
+Returns an integer identifier based on special character found:
+> : 1; < : 2; | : 3; < X > : 4
+Returns 0 if no pipes or redirection characters found.
+===============================================*/
 int check_special(char * cmd) {
   if(strchr(cmd, '>')) return 1;
   if(strchr(cmd, '<')) return 2;
   if(strchr(cmd, '|')) return 3;
+  //for double redirection
   if(strchr(cmd, '>') && strchr(cmd, '<')) return 4;
   return 0;
 }
 
+/*======== int size(char ** args) ==========
+Inputs: char ** args
+Returns: int size
+
+Finds the size of an array of strings.
+==========================================*/
 int size(char** args)
 {
   int i = 0;
@@ -60,24 +101,40 @@ int size(char** args)
 }
   
   
-//handles commands that require redirection
+/*======== void pipredir(int id, char * cmd) ==========
+Inputs: int id, char * cmd
+Returns: NONE
+
+Executes the redirection and piping functionality of the shell.
+id == 1: signals > redirection
+  Parses arguments with > delimeter
+  Chaining - if more than one '>', create series of empty files, and dup/dup2
+  for the last file (the only one that gets written in)
+  For last file, open a file and switch it with stdout using dup and dup2.
+id == 2: signals < redirection
+  Parses arguments with < delimeter
+  No chaining - 
+=====================================================*/
 void pipredir(int id, char * cmd) {
   char ** args;
   char ** new_cmd;
   int new, copy, old, tmp;
+  // > redirection
   if (id == 1){
     args = parse_args(cmd, ">");
     int i = 1;
-    printf("size: %d\n", size(args));
+    //printf("size: %d\n", size(args));
     while(i < size(args))
       {
 	if (strcmp(args[i], "")) {
+	  //the last argument
 	  if(i == size(args)-1)
 	    {
 	      new = open(trim(args[i]), O_CREAT | O_WRONLY, 0644);
 	      copy = dup(STDOUT_FILENO);
 	      old = dup2(new, STDOUT_FILENO);
 	    }
+	  //intermediary files
 	  else{
 	    tmp = open(trim(args[i]), O_CREAT, 0644);
 	    close(tmp);
@@ -90,14 +147,22 @@ void pipredir(int id, char * cmd) {
 	}
 	i ++;
       }
-    printf("done\n");
   }
   else if (id == 2) {
     args = parse_args(cmd, "<");
     if (strcmp(args[1], "")) {
-      new = open(trim(args[1]), O_RDONLY);
-      copy = dup(STDIN_FILENO);
-      old = dup2(new, STDIN_FILENO);
+      if (open(trim(args[1]), O_RDONLY) != -1)
+	{
+	  //printf("new: %d\n", new);
+	  new = open(trim(args[1]), O_RDONLY);
+	  copy = dup(STDIN_FILENO);
+	  old = dup2(new, STDIN_FILENO);
+	}
+      else
+	{
+	  printf("shell: '%s' :No such file or directory\n", trim(args[1]));
+	  return;
+	}
     }
     else {
       printf("shell: syntax error near <\n");
