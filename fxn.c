@@ -148,27 +148,44 @@ void pipredir(int id, char * cmd) {
 	i ++;
       }
   }
+  // < redirection
   else if (id == 2) {
     args = parse_args(cmd, "<");
-    if (strcmp(args[1], "")) {
-      if (open(trim(args[1]), O_RDONLY) != -1)
-	{
-	  //printf("new: %d\n", new);
-	  new = open(trim(args[1]), O_RDONLY);
-	  copy = dup(STDIN_FILENO);
-	  old = dup2(new, STDIN_FILENO);
+    int i = 1;
+    while (i < size(args))
+      {
+	if (strcmp(args[i], "")) {
+	  new = open(trim(args[i]), O_RDONLY);
+	  if (i == size(args)-1)
+	    {
+	      if (new != -1)
+		{
+		  copy = dup(STDIN_FILENO);
+		  old = dup2(new, STDIN_FILENO);
+		}
+	      else
+		{
+		  printf("shell: '%s' :No such file or directory\n", trim(args[i]));
+		  close(new);
+		  return;
+		}
+	    }
+	  else{
+	    if (new == -1)
+	      {
+		printf("shell: '%s' :No such file or directory\n", trim(args[i]));
+		close(new);
+		return;
+	      }
+	  }
+	  i ++;
 	}
-      else
-	{
-	  printf("shell: '%s' :No such file or directory\n", trim(args[1]));
+	else {
+	  printf("shell: syntax error near <\n");
+	  free(args);
 	  return;
 	}
-    }
-    else {
-      printf("shell: syntax error near <\n");
-      free(args);
-      return;
-    }
+      }
   }
   else if (id == 3){
     args = parse_args(cmd, "|");
