@@ -233,6 +233,9 @@ void pipredir(int id, char * cmd) {
       return;
     }
   }
+  else if (id == 4)
+    {
+    }
   new_cmd = parse_args(trim(args[0]), " ");
   fork_exec(new_cmd);
   dup2(copy, old);
