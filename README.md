@@ -1,6 +1,6 @@
 # she_sells_seaSHELLs_by_the_seashore
-DWSH<br>
-by JonAlf Dyrland-Weaver and Neeraj Bhatia
+**she_sells_seaSHELLs_by_the_seashore** <br>
+*by Adeebur Rahman and Jen Yu*
 
 ## Features:<br>
 * Forks and executes commands. 
