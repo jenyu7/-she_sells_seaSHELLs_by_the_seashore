@@ -93,8 +93,11 @@ char * trim(char *c) {
   Returns an integer identifier based on special character found:
   > : 1; < : 2; | : 3
   Returns 0 if no pipes or redirection characters found.
+  Also returns 0 if appending operators used (not supported)
   ===============================================*/
 int check_special(char * cmd) {
+  if(strstr(cmd, ">>")) return 0;
+  if(strstr(cmd, "<<")) return 0;
   if(strchr(cmd, '<')) return 1;
   if(strchr(cmd, '>')) return 2;
   if(strchr(cmd, '|')) return 3;
