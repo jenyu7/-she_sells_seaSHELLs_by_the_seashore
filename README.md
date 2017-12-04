@@ -13,9 +13,12 @@
 **The following did not end up working, but have been left in the code, commented out.**  
 
 ## Bugs:  
-* ```>>``` and ```<<``` operators do not work; though not required and do not crash the program, they will cause an error to be printed out in the shell. 
+* ```>>```, ```>&``` and ```<&``` operators do not work; though not required and do not crash the program, they will cause an error to be printed out in the shell. 
 
 ## Files & Function Headers:  
+`head.h`  
+ **Contains all function headers and #include statements**
+
 `fxn.c`  
 **Contains all functions used within project**  
 
@@ -69,7 +72,7 @@
     Returns an integer identifier based on special character found:  
     > : 1; < : 2; | : 3  
     Returns 0 if no pipes or redirection characters found.  
-    Also returns 0 if appending operators used (not supported)
+    Also returns 0 if >>, >& or <& used (not supported)
     ===============================================*/  
 
     /*======== int size(char ** args) ==========  
@@ -116,5 +119,20 @@
     ===============================================*/  
   
 `shell.c`  
-**Handles the sequence of running commands in the shell, by calling the functions in `fxn.c`**  
+**Handles the sequence of running commands in the shell, by calling the functions in `fxn.c`** 
+
+    /*========static void sighandler(int signo)========
+      Inputs: int signo
+      Outputs: NONE
+
+      If Ctrl-C pressed, print out a new shell prompt.m
+      ===============================================*/
+      
+      /*========int main()========
+      Inputs: NONE
+      Outputs: 0
+
+      Keeps the shell running! 
+      Prints prompt, reads input, and executes fxns.
+      =========================*/
 
