@@ -251,6 +251,7 @@ void fork_exec( char ** args ) {
   }
   //if exit command entered
   if (!strcmp(args[0], "exit")) {
+    free(args);
     exit(0);
   }
   //if asked to change directory (cd)
