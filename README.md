@@ -5,7 +5,7 @@
 * Forks and executes commands.  
 * Parses multiple commands on one line.  
 * Redirects using >, <.  
-- Chaining redirections like `ls > a > b > c`, `wc < a < b < c`, and `wc < a > b > c` work like they would in bash.  
+* Chaining redirections like `ls > a > b > c`, `wc < a < b < c`, and `wc < a > b > c` work like they would in bash.  
 * Simple piping, such as `ls | wc` works.  
 * Prints out shell prompt with user, hostname and current working directory.  
 
