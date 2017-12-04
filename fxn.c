@@ -143,6 +143,12 @@ void pipredir(int id, char * cmd, char * exec) {
     printf("shell: error this form of redirect is not supported\n");
   }
   else if (id == 1) {
+    if (exec) { strsep(&cmd, "<"); }
+    else { exec = strsep(&cmd, "<"); }
+    if (!strcmp(cmd, "")) {
+      printf("shell: syntax error near <\n");
+      return;
+    }
     if (check_special(cmd)) {
       cmd = trim(cmd);
       char back[strlen(cmd)];
