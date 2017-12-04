@@ -13,7 +13,7 @@
 **The following did not end up working, but have been left in the code, commented out.**  
 
 ## Bugs:  
-* ```>>```, ```>&``` and ```<&``` operators do not work; though not required and do not crash the program, they will cause an error to be printed out in the shell. 
+* `>>`, `>&`, `>>&`, `1>`, `1>>`, `2>`, `2>>`, `&>`, and `&>>` are not supported. Even though they were not required, it doesn't break the program either. They print out an error instead.  
 
 ## Files & Function Headers:  
 `head.h`  
@@ -40,7 +40,7 @@
     =======================================*/  
   
     /*======== char** parse_args() ==========  
-    Inputs: char* line, char \* delim  
+    Inputs: char* line, char * delim  
     Returns: char** [array of strings previously separated by delim]  
     
     Starts with parsing five arguments using strsep  

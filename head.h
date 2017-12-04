@@ -6,7 +6,6 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
-#include <sys/types.h>
 #include <pwd.h>
 #include <fcntl.h>
 

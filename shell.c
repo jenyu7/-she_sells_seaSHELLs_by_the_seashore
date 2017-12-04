@@ -25,7 +25,7 @@ static void sighandler(int signo) {
   Inputs: NONE
   Outputs: 0
 
-  Keeps the shell running! 
+  Keeps the shell running!
   Prints prompt, reads input, and executes fxns.
   =========================*/
 int main()

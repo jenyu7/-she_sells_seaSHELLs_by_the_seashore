@@ -156,18 +156,19 @@ void pipredir(int id, char * cmd, char * exec) {
       char * curfile = strsep(&cmd, " ");
       curfile = trim(curfile);
       new = open(curfile, O_RDONLY);
-      if (new == -1) {
-        printf("shell: '%s': No such file or directory\n", curfile);
-        close(new);
-        return;
-      }
       copy = dup(STDIN_FILENO);
       old = dup2(new, STDIN_FILENO);
       pipredir(check_special(back), back, exec);
       dup2(copy, old);
     }
     else {
-      new = open(trim(cmd), O_CREAT | O_RDONLY);
+      cmd = trim(cmd);
+      new = open(cmd, O_RDONLY);
+      if (new == -1) {
+        printf("shell: '%s': No such file or directory\n", cmd);
+        close(new);
+        return;
+      }
       copy = dup(STDIN_FILENO);
       old = dup2(new, STDIN_FILENO);
       exec = trim(exec);
