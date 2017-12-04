@@ -11,7 +11,7 @@
 
 ## Attempted:  
 **The following were attempted but never completed**  
-* Multiple pipes in a statement such as `ls | wc | cat`. Instead, the first command is piped into the second, and everything else is ignored.  
+* Multiple pipes in a statement such as `ls | wc | cat`. Instead an error is printed out saying pipes can't be combined with other redirects.  
 
 ## Bugs:  
 * `>>`, `>&`, `>>&`, `1>`, `1>>`, `2>`, `2>>`, `&>`, and `&>>` are not supported. Even though they were not required, it doesn't break the program either. They print out an error instead.  
