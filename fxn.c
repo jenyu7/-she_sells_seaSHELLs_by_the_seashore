@@ -145,7 +145,12 @@ void pipredir(int id, char * cmd, char * exec) {
       strcpy(back, cmd);
       char * curfile = strsep(&cmd, " ");
       curfile = trim(curfile);
-      new = open(curfile, O_CREAT | O_RDONLY);
+      new = open(curfile, O_RDONLY);
+      if (new == -1) {
+        printf("shell: '%s': No such file or directory\n", curfile);
+        close(new);
+        return;
+      }
       copy = dup(STDIN_FILENO);
       old = dup2(new, STDIN_FILENO);
       pipredir(check_special(back), back, exec);
