@@ -93,12 +93,14 @@ char * trim(char *c) {
   Returns an integer identifier based on special character found:
   > : 1; < : 2; | : 3
   Returns 0 if no pipes or redirection characters found.
-  Also returns 0 if >>, >& or <& used (not supported)
+  Returns -1 if >>, >&, >>&, 1>, 1>>, 2>, 2>>, &>, or &>> used (not supported)
   ===============================================*/
 int check_special(char * cmd) {
-  if(strstr(cmd, ">>")) return 0;
-  if(strstr(cmd, "<&")) return 0;
-  if(strstr(cmd, ">&")) return 0;
+  if(strstr(cmd, ">>")) return -1;
+  if(strstr(cmd, ">&")) return -1;
+  if(strstr(cmd, "1>")) return -1;
+  if(strstr(cmd, "2>")) return -1;
+  if(strstr(cmd, "&>")) return -1;
   if(strchr(cmd, '<')) return 1;
   if(strchr(cmd, '>')) return 2;
   if(strchr(cmd, '|')) return 3;
@@ -127,6 +129,7 @@ int size(char** args)
   id == 1: signals < redirection
   Parses arguments with < delimiter
   Chaining - if more than one '<', only the last one is read as stdin like bash. If there are '>' afterwards, only the file after the last one will get written to.
+  Fails if file doesn't exist like bash.
   id == 2: signals > redirection
   Parses arguments with > delimiter
   Chaining - if more than one '>', only the last one gets written in like bash.
@@ -136,13 +139,10 @@ int size(char** args)
   =====================================================*/
 void pipredir(int id, char * cmd, char * exec) {
   int new, copy, old;
-  if (id == 1) {
-    if (exec) { strsep(&cmd, "<"); }
-    else { exec = strsep(&cmd, "<"); }
-    if (!strcmp(cmd, "")) {
-      printf("Syntax error near <\n");
-      return;
-    }
+  if (id == -1) {
+    printf("shell: error this form of redirect is not supported\n");
+  }
+  else if (id == 1) {
     if (check_special(cmd)) {
       cmd = trim(cmd);
       char back[strlen(cmd)];
@@ -172,11 +172,11 @@ void pipredir(int id, char * cmd, char * exec) {
       close(new);
     }
   }
-  if (id == 2) {
+  else if (id == 2) {
     if (exec) { strsep(&cmd, ">"); }
     else { exec = strsep(&cmd, ">"); }
     if (!strcmp(cmd, "")) {
-      printf("Syntax error near >\n");
+      printf("shell: syntax error near >\n");
       return;
     }
     if (check_special(cmd)) {
@@ -203,13 +203,13 @@ void pipredir(int id, char * cmd, char * exec) {
       close(new);
     }
   }
-  if (id == 3) {
+  else if (id == 3) {
     char ** args = parse_args(cmd, "|");
     if (strcmp(args[1], "")) {
       FILE *fp;
       fp = popen(args[0],"r");
       if (!fp) {
-          printf("Error: pipe could not be created\n");
+          printf("shell: error pipe could not be created\n");
           return;
       }
       copy = dup(STDIN_FILENO);
@@ -222,7 +222,7 @@ void pipredir(int id, char * cmd, char * exec) {
       free(args);
     }
     else {
-      printf("Syntax error near |\n");
+      printf("shell: syntax error near |\n");
     }
   }
 }
