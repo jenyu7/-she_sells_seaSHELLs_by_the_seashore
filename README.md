@@ -71,9 +71,9 @@
 
     Checks if the cmdline input involves redirection or piping.  
     Returns an integer identifier based on special character found:  
-    > : 1; < : 2; | : 3  
+    | : 1, < : 2; > : 3;  
     Returns 0 if no pipes or redirection characters found.  
-    Also returns 0 if >>, >& or <& used (not supported)
+    Returns -1 if >>, >&, >>&, 1>, 1>>, 2>, 2>>, &>, or &>> used (not supported)  
     ===============================================*/  
 
     /*======== int size(char ** args) ==========  

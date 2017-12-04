@@ -91,7 +91,7 @@ char * trim(char *c) {
 
   Checks if the cmdline input involves redirection or piping.
   Returns an integer identifier based on special character found:
-  > : 1; < : 2; | : 3
+  | : 1, < : 2; > : 3;
   Returns 0 if no pipes or redirection characters found.
   Returns -1 if >>, >&, >>&, 1>, 1>>, 2>, 2>>, &>, or &>> used (not supported)
   ===============================================*/
@@ -101,9 +101,9 @@ int check_special(char * cmd) {
   if(strstr(cmd, "1>")) return -1;
   if(strstr(cmd, "2>")) return -1;
   if(strstr(cmd, "&>")) return -1;
-  if(strchr(cmd, '<')) return 1;
-  if(strchr(cmd, '>')) return 2;
-  if(strchr(cmd, '|')) return 3;
+  if(strchr(cmd, '|')) return 1;
+  if(strchr(cmd, '<')) return 2;
+  if(strchr(cmd, '>')) return 3;
   return 0;
 }
 
@@ -113,8 +113,7 @@ int check_special(char * cmd) {
 
   Finds the size of an array of strings.
   ==========================================*/
-int size(char** args)
-{
+int size(char** args) {
   int i = 0;
   while(*args++) { i++; }
   return i;
@@ -143,6 +142,35 @@ void pipredir(int id, char * cmd, char * exec) {
     printf("shell: error this form of redirect is not supported\n");
   }
   else if (id == 1) {
+    char back[strlen(cmd)];
+    strcpy(back, cmd);
+    strsep(&cmd, "|");
+    if (check_special(cmd)) {
+      printf("shell: error piping can not be combined with other redirects\n");
+      return;
+    }
+    char ** args = parse_args(back, "|");
+    if (strcmp(args[1], "")) {
+      FILE *fp;
+      fp = popen(args[0],"r");
+      if (!fp) {
+          printf("shell: error pipe could not be created\n");
+          return;
+      }
+      copy = dup(STDIN_FILENO);
+      old = dup2(fileno(fp), STDIN_FILENO);
+      char ** new_cmd = parse_args(trim(args[1]), " ");
+      fork_exec(new_cmd);
+      dup2(copy, old);
+      pclose(fp);
+      free(new_cmd);
+      free(args);
+    }
+    else {
+      printf("shell: syntax error near |\n");
+    }
+  }
+  else if (id == 2) {
     if (exec) { strsep(&cmd, "<"); }
     else { exec = strsep(&cmd, "<"); }
     if (!strcmp(cmd, "")) {
@@ -179,7 +207,7 @@ void pipredir(int id, char * cmd, char * exec) {
       close(new);
     }
   }
-  else if (id == 2) {
+  else if (id == 3) {
     if (exec) { strsep(&cmd, ">"); }
     else { exec = strsep(&cmd, ">"); }
     if (!strcmp(cmd, "")) {
@@ -208,28 +236,6 @@ void pipredir(int id, char * cmd, char * exec) {
       free(args);
       dup2(copy, old);
       close(new);
-    }
-  }
-  else if (id == 3) {
-    char ** args = parse_args(cmd, "|");
-    if (strcmp(args[1], "")) {
-      FILE *fp;
-      fp = popen(args[0],"r");
-      if (!fp) {
-          printf("shell: error pipe could not be created\n");
-          return;
-      }
-      copy = dup(STDIN_FILENO);
-      old = dup2(fileno(fp), STDIN_FILENO);
-      char ** new_cmd = parse_args(trim(args[1]), " ");
-      fork_exec(new_cmd);
-      dup2(copy, old);
-      pclose(fp);
-      free(new_cmd);
-      free(args);
-    }
-    else {
-      printf("shell: syntax error near |\n");
     }
   }
 }
