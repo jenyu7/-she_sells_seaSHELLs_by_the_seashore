@@ -91,7 +91,7 @@ char * trim(char *c) {
 
   Checks if the cmdline input involves redirection or piping.
   Returns an integer identifier based on special character found:
-  > : 1; < : 2; | : 3;
+  > : 1; < : 2; | : 3
   Returns 0 if no pipes or redirection characters found.
   ===============================================*/
 int check_special(char * cmd) {
@@ -120,12 +120,15 @@ int size(char** args)
   Returns: NONE
 
   Executes the redirection and piping functionality of the shell.
-  id == 1: signals > redirection
-  Parses arguments with > delimeter
+  id == 1: signals < redirection
+  Parses arguments with < delimiter
+  Chaining - if more than one '<', only the last one is read as stdin like bash. If there are '>' afterwards, only the file after the last one will get written to.
+  id == 2: signals > redirection
+  Parses arguments with > delimiter
   Chaining - if more than one '>', only the last one gets written in like bash.
-  id == 2: signals < redirection
-  Parses arguments with < delimeter
-  Chaining - if more than one '<', only the last one is read as stdin like bash.
+  id == 3: signals | redirection
+  Parses arguments with | delimiter
+  Consecutive piping not implemented.
   =====================================================*/
 void pipredir(int id, char * cmd, char * exec) {
   int new, copy, old;
@@ -185,7 +188,6 @@ void pipredir(int id, char * cmd, char * exec) {
       old = dup2(new, STDOUT_FILENO);
       exec = trim(exec);
       char ** args = parse_args(exec, " ");
-
       fork_exec(args);
       free(args);
       dup2(copy, old);
