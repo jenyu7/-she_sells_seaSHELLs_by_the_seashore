@@ -4,7 +4,7 @@
 ## Features:  
 * Forks and executes commands.  
 * Parses multiple commands on one line.  
-* Redirects using >, <.  
+* Redirects using ```>```, ```<```.  
 * Chaining redirections like `ls > a > b > c`, `wc < a < b < c`, and `wc < a > b > c` work like they would in bash.  
 * Simple piping, such as `ls | wc` works.  
 * Prints out shell prompt with user, hostname and current working directory.  
@@ -13,7 +13,7 @@
 **The following did not end up working, but have been left in the code, commented out.**  
 
 ## Bugs:  
-
+* ```>>``` and ```<<``` operators do not work; though not required and do not crash the program, they will cause an error to be printed out in the shell. 
 
 ## Files & Function Headers:  
 `fxn.c`  
